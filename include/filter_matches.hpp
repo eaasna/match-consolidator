@@ -1,14 +1,20 @@
 #pragma once
 #include <seqan3/alphabet/nucleotide/dna5.hpp>
+#include <seqan3/argument_parser/validators.hpp>
 #include <seqan3/core/debug_stream.hpp>
 #include <seqan3/io/sam_file/all.hpp>
 #include <seqan3/std/filesystem>
 
-/*! \brief Function, converting fastq files to fasta files.
- *  \param fastq_file input file path to the fastq file
- *  \param out output file path for the fasta file
+#include <deque>
+
+void consolidate_matches_for_read();
+
+
+/* 
+ *  \param sam_file input file path to the sam file
+ *  \param out output file path for the filtered sam file
  *
- *  Simple function, converting fastq files to fasta files using the seqan3 library.
- *  For more information about the SeqAn Library functions see https://docs.seqan.de/seqan/3-master-user/.
+ * Function iterates through all records in the sam file and writes a filtered version to out.
+ *
  */
-void filter_matches(std::filesystem::path sam_file, std::filesystem::path out);
+void run_consolidator(std::filesystem::path sam_file, std::filesystem::path out, uint8_t x);

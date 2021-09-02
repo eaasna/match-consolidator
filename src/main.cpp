@@ -12,6 +12,7 @@ int main(int argc, char ** argv)
     // Declarations for argument parser
     std::filesystem::path sam_file{};
     std::filesystem::path output_file{};
+    uint8_t strata_width{0};
     bool verbose = false;
 
     // Parser
@@ -21,6 +22,11 @@ int main(int argc, char ** argv)
                                  seqan3::input_file_validator{{"sam"}}); // Takes a fastq file and validates it
     //output path as option, otherwise output is printed
     parser.add_option(output_file, 'o', "output", "The file for sam output. Default: stdout");
+    //this is x in (best+x) strata mapping
+    parser.add_option(strata_width, 's', "strata", 
+		    "Consider matches within this edit distance compared to the optimal.", 
+		    seqan3::option_spec::standard, seqan3::arithmetic_range_validator{0, 10});
+    
     parser.add_flag(verbose, 'v', "verbose", "Give more detailed information here."); // example for a flag
 
     try
@@ -33,7 +39,7 @@ int main(int argc, char ** argv)
         return -1;
     }
 
-    filter_matches(sam_file, output_file); // Call strata (best+x) based filter
+    run_consolidator(sam_file, output_file, strata_width); // Call strata (best+x) based filter
 
     if (verbose) // if flag is set
         seqan3::debug_stream << "Consolidating read mapping was a success.\n";
