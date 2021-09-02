@@ -3,24 +3,24 @@
 #include <seqan3/argument_parser/all.hpp>
 #include <seqan3/core/debug_stream.hpp>
 
-#include "fastq_conversion.hpp"
+#include "filter_matches.hpp"
 
 int main(int argc, char ** argv)
 {
-    seqan3::argument_parser parser{"Fastq-to-Fasta-Converter", argc, argv};
+    seqan3::argument_parser parser{"Distributed-mapping-consolidator", argc, argv};
 
     // Declarations for argument parser
-    std::filesystem::path fastq_file{};
+    std::filesystem::path sam_file{};
     std::filesystem::path output_file{};
     bool verbose = false;
 
     // Parser
-    parser.info.author = "SeqAn-Team"; // give parser some infos
+    parser.info.author = "Evelin Aasna"; // give parser some infos
     parser.info.version = "1.0.0";
-    parser.add_positional_option(fastq_file, "Please provide a fastq file.",
-                                 seqan3::input_file_validator{{"fq","fastq"}}); // Takes a fastq file and validates it
+    parser.add_positional_option(sam_file, "Please provide a sam file.",
+                                 seqan3::input_file_validator{{"sam"}}); // Takes a fastq file and validates it
     //output path as option, otherwise output is printed
-    parser.add_option(output_file, 'o', "output", "The file for fasta output. Default: stdout");
+    parser.add_option(output_file, 'o', "output", "The file for sam output. Default: stdout");
     parser.add_flag(verbose, 'v', "verbose", "Give more detailed information here."); // example for a flag
 
     try
@@ -33,12 +33,10 @@ int main(int argc, char ** argv)
         return -1;
     }
 
-    convert_fastq(fastq_file, output_file); // Call fastq to fasta converter
+    filter_matches(sam_file, output_file); // Call strata (best+x) based filter
 
     if (verbose) // if flag is set
-        seqan3::debug_stream << "Conversion was a success. Congrats!\n";
-
-
+        seqan3::debug_stream << "Consolidating read mapping was a success.\n";
 
     return 0;
 }
