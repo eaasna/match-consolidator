@@ -13,7 +13,7 @@ int main(int argc, char ** argv)
     std::filesystem::path sam_file{};
     std::filesystem::path output_file{};
     uint8_t strata_width{0};
-    bool verbose = false;
+    bool verbose{true};
 
     // Parser
     parser.info.author = "Evelin Aasna"; // give parser some infos
@@ -26,8 +26,7 @@ int main(int argc, char ** argv)
     parser.add_option(strata_width, 's', "strata", 
 		    "Consider matches within this edit distance compared to the optimal.", 
 		    seqan3::option_spec::standard, seqan3::arithmetic_range_validator{0, 10});
-    
-    parser.add_flag(verbose, 'v', "verbose", "Give more detailed information here."); // example for a flag
+    parser.add_option(verbose, 'v', "verbose", "More feedback to run.");
 
     try
     {
@@ -41,8 +40,9 @@ int main(int argc, char ** argv)
 
     run_consolidator(sam_file, output_file, strata_width); // Call strata (best+x) based filter
 
-    if (verbose) // if flag is set
+    if (verbose)
+    {
         seqan3::debug_stream << "Consolidating read mapping was a success.\n";
-
+    }
     return 0;
 }
