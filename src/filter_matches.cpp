@@ -5,38 +5,35 @@ records_t consolidate_matches_for_read(records_t &records, strata_t x)
 {
     using namespace seqan3::literals;
 
-    seqan3::sam_tag_dictionary dict{};
     using nm_tag_type = seqan3::sam_tag_type_t<"NM"_tag>;
-    
     std::deque<int> edit_distances{};
    
     // gather all edit distances for one read
     for (auto & record : records)
     {
-	// TODO: does this make a copy?
-        dict = record.tags();
+	// TODO: there should be a way to avoid writing the type each time
+	seqan3::sam_tag_dictionary & dict = record.tags();  // pass a reference to the vector (no copy)
         auto nm = dict.get<"NM"_tag>();
 	edit_distances.push_back(nm);
     }
 
+    // find edit distance for the optimal match
     std::deque<int>::iterator it = std::min_element(edit_distances.begin(), edit_distances.end());
     int optimal_nm = *it;
-    seqan3::debug_stream << "optimal: " << optimal_nm << '\n';
 
-    /* should be possible using a view but didn't work
+    /* TODO: should be possible using a view but didn't work
     auto nm_filter = std::views::filter([&] (auto & record)
     {
         return record.tags().get<"NM"_tag>() <= optimal_nm + x;    
     });
     */
 
+    // filter out any matches that are worse than best + x
     records_t filtered_records{};
     for (auto & record : records)
     {
-	seqan3::debug_stream << record.id() << '\t';
-	dict = std::move(record.tags());
+	seqan3::sam_tag_dictionary & dict = record.tags();
 	auto nm = dict.get<"NM"_tag>();
-	seqan3::debug_stream << nm << '\t';
 	if (nm <= optimal_nm + x)
 	{
             filtered_records.push_back(record);
@@ -84,7 +81,7 @@ void run_consolidator(std::filesystem::path sam_file, std::filesystem::path out,
 		}
 		else 
 		{
-		    auto filtered_records = consolidate_matches_for_read(records, x); // return pointer; no copy
+		    auto filtered_records = consolidate_matches_for_read(records, x); // return pointer (no copy)
 		    fout = filtered_records;
 		}
 	        current_read_id = record.id();
@@ -92,6 +89,5 @@ void run_consolidator(std::filesystem::path sam_file, std::filesystem::path out,
 	        records.push_back(record);
 	    }
 	}
-
     }
 }    
